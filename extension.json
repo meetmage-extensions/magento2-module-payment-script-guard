@@ -1,0 +1,73 @@
+{
+    "name": "Payment Script Guard",
+    "slug": "payment-script-guard",
+    "version": "1.0.0",
+    "released": null,
+    "packagist": "meetmage/module-payment-script-guard",
+    "description": "Keep an inventory of every script on your Magento checkout with a justification for each (PCI DSS 4.0.1 requirement 6.4.3) and get alerted when a script or the page's security headers change (requirement 11.6.1). Catches injected card skimmers. Works with Luma, Hyvä and one-step checkouts.",
+    "shortDescription": "PCI DSS 4.0.1 checkout script inventory and skimmer detection (6.4.3 and 11.6.1)",
+    "category": "admin-security",
+    "icon": "shield",
+    "features": [
+        {
+            "icon": "search",
+            "title": "Every checkout script, found automatically",
+            "text": "A tiny reporter on your payment pages lists every script file and inline script, including scripts injected after the page loads and removed straight away, the way card skimmers hide."
+        },
+        {
+            "icon": "check",
+            "title": "Authorize with a written justification",
+            "text": "Approve or reject each script with a business reason, as PCI DSS 6.4.3 asks. Your own store's files are authorized automatically; every decision is logged with the admin's name."
+        },
+        {
+            "icon": "shield",
+            "title": "Tamper detection that knows your deployments",
+            "text": "Every hour each file is compared with its approved SHA-384 hash. Your store's files are read from disk: a change after a deployment is accepted, a change without one is a critical alert."
+        },
+        {
+            "icon": "globe",
+            "title": "Skimmer domains can't hide in inline code",
+            "text": "Inline scripts are fingerprinted by their code and the domains they reference, so per-customer data doesn't create noise, but a new exfiltration domain always raises an alert."
+        },
+        {
+            "icon": "settings",
+            "title": "Security header watch",
+            "text": "Records the Content-Security-Policy and other security headers of your payment pages and alerts you when they change (PCI DSS 11.6.1)."
+        },
+        {
+            "icon": "file",
+            "title": "Email alerts and a report for your assessor",
+            "text": "Grouped email alerts, an admin notice and activity log, and a one-click CSV of the full inventory with justifications and hashes for your PCI assessment."
+        }
+    ],
+    "compatibility": {
+        "magento": [
+            "2.4.6",
+            "2.4.7",
+            "2.4.8",
+            "2.4.9"
+        ],
+        "php": [
+            "8.1",
+            "8.2",
+            "8.3",
+            "8.4",
+            "8.5"
+        ],
+        "hyva": true,
+        "hyvaVersion": ">=1.3.0"
+    },
+    "tags": [
+        "pci-dss",
+        "magecart",
+        "security",
+        "checkout",
+        "csp",
+        "sri",
+        "hyva"
+    ],
+    "testedOn": "2.4.9",
+    "images": [],
+    "documentation": "https://github.com/meetmage-extensions/magento2-module-payment-script-guard#readme",
+    "status": "in-development"
+}

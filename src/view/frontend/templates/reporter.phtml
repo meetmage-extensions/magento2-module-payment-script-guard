@@ -1,0 +1,160 @@
+<?php
+/**
+ * Payment page script reporter (MeetMage Payment Script Guard).
+ *
+ * Lists every executable script on the page, including scripts added later (a skimmer usually injects
+ * its code after the page has loaded, sometimes removing the tag right away), and sends the list to the
+ * store. Inline scripts are sent as SHA-256 hashes first; the source is only uploaded for hashes the store
+ * has not seen yet. Plain JavaScript without dependencies, so it works on Luma, Hyvä and custom checkouts.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ */
+
+/** @var \MeetMage\PaymentScriptGuard\ViewModel\Reporter $viewModel */
+$viewModel = $block->getData('view_model');
+if (!$viewModel->isActive()) {
+    return;
+}
+
+$script = <<<'JS'
+(function () {
+    var cfg = __PSG_CONFIG__, self = document.currentScript;
+    if (!window.fetch || !window.JSON || Math.random() * 100 >= cfg.sample) {
+        return;
+    }
+    var EXEC = /^(|text\/javascript|application\/javascript|module|text\/ecmascript|application\/ecmascript)$/i;
+    var seenSrc = {}, seenNodes = [], external = [], inline = {}, timer = null;
+    var stopAt = Date.now() + 600000;
+    var pageUrl = location.protocol + '//' + location.host + location.pathname;
+
+    function hex(buffer) {
+        var bytes = new Uint8Array(buffer), out = '';
+        for (var i = 0; i < bytes.length; i++) {
+            out += ('0' + bytes[i].toString(16)).slice(-2);
+        }
+        return out;
+    }
+    function sha256(text) {
+        if (!window.crypto || !crypto.subtle || !window.TextEncoder) {
+            return Promise.resolve(null);
+        }
+        return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(hex, function () {
+            return null;
+        });
+    }
+    function post(body) {
+        return fetch(cfg.url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        }).then(function (r) {
+            return r.ok ? r.json() : {};
+        })['catch'](function () {
+            return {};
+        });
+    }
+    function base() {
+        return {t: cfg.token, p: cfg.page, u: pageUrl};
+    }
+    function flush() {
+        timer = null;
+        var ext = external.splice(0), sources = inline, hashes = [], direct = [];
+        inline = {};
+        Object.keys(sources).forEach(function (key) {
+            if (key.indexOf('raw:') === 0) {
+                direct.push({h: null, c: sources[key]});
+            } else {
+                hashes.push(key);
+            }
+        });
+        if (!ext.length && !hashes.length && !direct.length) {
+            return;
+        }
+        var body = base();
+        body.e = ext;
+        body.i = hashes;
+        body.c = direct;
+        post(body).then(function (res) {
+            var upload = [];
+            ((res && res.need) || []).forEach(function (hash) {
+                if (typeof sources[hash] === 'string' && sources[hash].length < 262144) {
+                    upload.push({h: hash, c: sources[hash]});
+                }
+            });
+            while (upload.length) {
+                var more = base();
+                more.c = upload.splice(0, 25);
+                post(more);
+            }
+        });
+    }
+    function schedule() {
+        if (!timer) {
+            timer = setTimeout(flush, 1500);
+        }
+    }
+    function check(node) {
+        if (node === self || seenNodes.indexOf(node) !== -1) {
+            return;
+        }
+        seenNodes.push(node);
+        if (!EXEC.test((node.getAttribute('type') || '').trim())) {
+            return;
+        }
+        if (node.src) {
+            if (!seenSrc[node.src]) {
+                seenSrc[node.src] = 1;
+                external.push(node.src);
+                schedule();
+            }
+            return;
+        }
+        var text = node.text || node.textContent || '';
+        if (!text.trim()) {
+            return;
+        }
+        sha256(text).then(function (hash) {
+            inline[hash || ('raw:' + Math.random())] = text;
+            schedule();
+        });
+    }
+    function scan(root) {
+        if (root.nodeName === 'SCRIPT') {
+            check(root);
+            return;
+        }
+        if (root.getElementsByTagName) {
+            var list = root.getElementsByTagName('script');
+            for (var i = 0; i < list.length; i++) {
+                check(list[i]);
+            }
+        }
+    }
+
+    scan(document);
+    if (window.MutationObserver) {
+        var observer = new MutationObserver(function (records) {
+            if (Date.now() > stopAt) {
+                observer.disconnect();
+                return;
+            }
+            // Use the added nodes from the records: a script that was added and removed again
+            // in the meantime is no longer in the document, but it did run.
+            for (var r = 0; r < records.length; r++) {
+                for (var n = 0; n < records[r].addedNodes.length; n++) {
+                    scan(records[r].addedNodes[n]);
+                }
+            }
+        });
+        observer.observe(document.documentElement, {childList: true, subtree: true});
+    }
+    window.addEventListener('load', function () {
+        scan(document);
+    });
+})();
+JS;
+$script = str_replace('__PSG_CONFIG__', $viewModel->getConfigJson(), $script);
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $script, false) ?>

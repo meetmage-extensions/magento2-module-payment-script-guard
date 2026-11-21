@@ -1,0 +1,148 @@
+<?php
+/**
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+/** @var \MeetMage\PaymentScriptGuard\ViewModel\Adminhtml\ScriptReview $viewModel */
+$viewModel = $block->getData('view_model');
+$script = $viewModel->getScript();
+if (!$script) {
+    return;
+}
+$isInline = $script['type'] === 'inline';
+$changed = $script['integrity_status'] === 'changed';
+$rows = [
+    (string) __('Type') => $isInline ? __('Inline script') : __('Script file'),
+    (string) __('Status') => $viewModel->statusLabel((string) $script['status']),
+    (string) __('First-party') => $script['first_party'] ? __('Yes, served from your store') : __('No'),
+    (string) __('Seen on') => $script['pages'],
+    (string) __('First seen (UTC)') => $script['first_seen_at'],
+    (string) __('Last seen (UTC)') => $script['last_seen_at'],
+    (string) __('Times seen') => $script['seen_count'],
+    (string) __('Justification') => $script['justification'],
+    (string) __('Decided by') => $script['authorized_by']
+        ? $script['authorized_by'] . ' · ' . $script['authorized_at'] . ' UTC' : '',
+];
+if (!$isInline) {
+    $rows[(string) __('Integrity')] = $viewModel->integrityLabel((string) $script['integrity_status']);
+    $rows[(string) __('Approved SHA-384')] = $script['baseline_hash'];
+    $rows[(string) __('Current SHA-384')] = $script['current_hash'];
+    $rows[(string) __('Last checked (UTC)')] = $script['last_checked_at'];
+}
+$warning = $script['first_party']
+    ? __('This file changed on your server without a new deployment. '
+        . 'Check it for injected code before you approve the new version.')
+    : __('This script changed since it was authorized. '
+        . 'Review the new version, then approve it, or reject the script.');
+$placeholder = __('Example: Stripe.js, needed to collect card details in the Stripe payment fields.');
+?>
+<div class="meetmage-psg-review">
+    <p>
+        <a href="<?= $escaper->escapeUrl($viewModel->getBackUrl()) ?>">
+            &larr; <?= $escaper->escapeHtml(__('Back to the inventory')) ?>
+        </a>
+    </p>
+
+    <h2 class="meetmage-psg-title">
+        <?= $escaper->escapeHtml($isInline ? $script['label'] : $script['url']) ?>
+    </h2>
+
+    <?php if ($changed): ?>
+        <div class="message message-warning"><?= $escaper->escapeHtml($warning) ?></div>
+    <?php endif; ?>
+
+    <table class="admin__table-secondary meetmage-psg-details">
+        <tbody>
+        <?php foreach ($rows as $label => $value): ?>
+            <tr>
+                <th><?= $escaper->escapeHtml($label) ?></th>
+                <td><?= $escaper->escapeHtml((string) $value) ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <?php if ($isInline): ?>
+        <?php if ($script['referenced_hosts']): ?>
+            <p>
+                <strong><?= $escaper->escapeHtml(__('Domains referenced by this script:')) ?></strong>
+                <?= $escaper->escapeHtml(str_replace("\n", ', ', (string) $script['referenced_hosts'])) ?>
+            </p>
+        <?php endif; ?>
+        <p><strong><?= $escaper->escapeHtml(__('Source (as first seen):')) ?></strong></p>
+        <pre class="meetmage-psg-source"><?= $escaper->escapeHtml((string) $script['content']) ?></pre>
+    <?php endif; ?>
+
+    <?php if ($viewModel->canDecide()): ?>
+        <form method="post" action="<?= $escaper->escapeUrl($viewModel->getSaveUrl()) ?>"
+              class="meetmage-psg-form">
+            <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+            <input type="hidden" name="id" value="<?= (int) $script['script_id'] ?>"/>
+            <h3><?= $escaper->escapeHtml(__('Your decision')) ?></h3>
+            <p>
+                <label for="psg-justification">
+                    <strong><?= $escaper->escapeHtml(__('Business justification (required to authorize)')) ?></strong>
+                </label>
+                <textarea id="psg-justification" name="justification" rows="3"
+                          placeholder="<?= $escaper->escapeHtmlAttr($placeholder) ?>"
+                ><?= $escaper->escapeHtml((string) $script['justification']) ?></textarea>
+            </p>
+            <?php if (!$isInline && !$script['first_party']): ?>
+                <p>
+                    <label>
+                        <input type="checkbox" name="allow_changes" value="1"
+                            <?= $script['allow_changes'] ? 'checked' : '' ?>/>
+                        <?= $escaper->escapeHtml(__(
+                            'The vendor updates this file without changing its URL: log changes instead of alerting.'
+                        )) ?>
+                    </label>
+                </p>
+            <?php endif; ?>
+            <p>
+                <button type="submit" name="decision" value="authorized" class="action-primary">
+                    <?= $escaper->escapeHtml($changed ? __('Approve this version') : __('Authorize')) ?>
+                </button>
+                <button type="submit" name="decision" value="rejected" class="action-secondary">
+                    <?= $escaper->escapeHtml(__('Reject')) ?>
+                </button>
+                <?php if (!$isInline && $script['integrity_status'] !== 'n/a'): ?>
+                    <button type="submit" name="decision" value="check" class="action-secondary">
+                        <?= $escaper->escapeHtml(__('Check integrity now')) ?>
+                    </button>
+                <?php endif; ?>
+            </p>
+        </form>
+    <?php endif; ?>
+
+    <h3><?= $escaper->escapeHtml(__('History')) ?></h3>
+    <table class="data-grid">
+        <thead>
+        <tr>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Date (UTC)')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Severity')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Event')) ?></th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($viewModel->getEvents() as $event): ?>
+            <tr>
+                <td class="meetmage-psg-nowrap"><?= $escaper->escapeHtml($event['created_at']) ?></td>
+                <td><?= $escaper->escapeHtml(ucfirst((string) $event['severity'])) ?></td>
+                <td><?= $escaper->escapeHtml($event['message']) ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+<?= /* @noEscape */ $secureRenderer->renderTag('style', [], <<<'CSS'
+.meetmage-psg-review { max-width: 1100px; }
+.meetmage-psg-title, .meetmage-psg-details td { word-break: break-all; }
+.meetmage-psg-details { margin-bottom: 24px; }
+.meetmage-psg-details th { width: 220px; }
+.meetmage-psg-source { max-height: 420px; overflow: auto; background: #f8f8f8; border: 1px solid #ddd;
+    padding: 12px; white-space: pre-wrap; word-break: break-all; }
+.meetmage-psg-form { margin: 24px 0; }
+.meetmage-psg-form textarea { display: block; width: 100%; max-width: 760px; margin-top: 6px; }
+.meetmage-psg-nowrap { white-space: nowrap; }
+CSS, false) ?>

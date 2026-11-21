@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="meetmage" translate="label" sortOrder="400">
+            <label>MeetMage</label>
+        </tab>
+        <section id="meetmage_paymentscriptguard" translate="label" sortOrder="20"
+                 showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Payment Script Guard</label>
+            <tab>meetmage</tab>
+            <resource>MeetMage_PaymentScriptGuard::config</resource>
+            <group id="general" translate="label comment" sortOrder="10"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <comment><![CDATA[Keeps an inventory of every script on your payment pages with a justification for
+each one (PCI DSS 4.0.1 requirement 6.4.3), and alerts you when a script or the page's security headers change
+(requirement 11.6.1). Review scripts under <strong>System &gt; Payment Script Guard</strong>.]]></comment>
+                <field id="enabled" translate="label" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="monitoring" translate="label" sortOrder="20" showInDefault="1">
+                <label>Script Inventory</label>
+                <field id="pages" translate="label comment" type="textarea" sortOrder="10" showInDefault="1">
+                    <label>Payment Pages</label>
+                    <comment><![CDATA[Full action names of the pages where card data is entered, one per line.
+Add the action name of a one-step checkout module if you use one.]]></comment>
+                </field>
+                <field id="sample_rate" translate="label comment" type="text" sortOrder="20" showInDefault="1">
+                    <label>Sampling (%)</label>
+                    <validate>validate-digits validate-digits-range digits-range-1-100</validate>
+                    <comment>Share of payment page visits that report their scripts. 100 is recommended: a
+                        skimmer may be shown to only some visitors.</comment>
+                </field>
+                <field id="auto_authorize_first_party" translate="label comment" type="select" sortOrder="30"
+                       showInDefault="1">
+                    <label>Auto-authorize Files From Your Own Domain</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Script files served from your store, static or media domain are added as authorized,
+                        with an automatic justification. They are still checked for unexpected changes.</comment>
+                </field>
+                <field id="first_party_hosts" translate="label comment" type="textarea" sortOrder="40"
+                       showInDefault="1">
+                    <label>Additional First-party Hosts</label>
+                    <comment>One host per line, for example a CDN that serves your static files
+                        (cdn.example.com). Your store's base URLs are included automatically.</comment>
+                </field>
+                <field id="bulk_justification" translate="label comment" type="textarea" sortOrder="50"
+                       showInDefault="1">
+                    <label>Justification for Bulk Authorization</label>
+                    <comment>Recorded when you authorize several scripts at once from the inventory grid.</comment>
+                </field>
+            </group>
+            <group id="integrity" translate="label" sortOrder="30" showInDefault="1">
+                <label>Integrity Checks</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1">
+                    <label>Check Scripts Every Hour</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Compares each authorized script with its approved SHA-384 hash. Files from your own
+                        store are read from disk; a change without a new deployment is reported as possible
+                        tampering. Requires Magento cron.</comment>
+                </field>
+            </group>
+            <group id="headers" translate="label" sortOrder="40" showInDefault="1">
+                <label>Security Headers</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1">
+                    <label>Watch Security Headers</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Records Content-Security-Policy and other security headers sent by Magento on payment
+                        pages and reports any change. Headers added by your web server or CDN are not visible
+                        to Magento.</comment>
+                </field>
+            </group>
+            <group id="alerts" translate="label" sortOrder="50" showInDefault="1">
+                <label>Alerts</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1">
+                    <label>Send Email Alerts</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="recipients" translate="label comment" type="text" sortOrder="20" showInDefault="1">
+                    <label>Send Alerts To</label>
+                    <comment>Comma-separated email addresses. Alerts are grouped and sent at most every
+                        10 minutes.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="identity" translate="label" type="select" sortOrder="30" showInDefault="1">
+                    <label>Email Sender</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Identity</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="template" translate="label" type="select" sortOrder="40" showInDefault="1">
+                    <label>Email Template</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

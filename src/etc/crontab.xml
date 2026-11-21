@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job name="meetmage_psg_check_integrity" instance="MeetMage\PaymentScriptGuard\Cron\CheckIntegrity"
+             method="execute">
+            <schedule>17 * * * *</schedule>
+        </job>
+        <job name="meetmage_psg_send_alerts" instance="MeetMage\PaymentScriptGuard\Cron\SendAlerts"
+             method="execute">
+            <schedule>*/10 * * * *</schedule>
+        </job>
+        <job name="meetmage_psg_cleanup" instance="MeetMage\PaymentScriptGuard\Cron\Cleanup" method="execute">
+            <schedule>41 3 * * *</schedule>
+        </job>
+    </group>
+</config>

@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <!-- Script inventory for PCI DSS 4.0.1 requirement 6.4.3 -->
+    <table name="meetmage_psg_script" resource="default" engine="innodb" comment="Payment page script inventory">
+        <column xsi:type="int" name="script_id" unsigned="true" nullable="false" identity="true"
+                comment="Script ID"/>
+        <column xsi:type="varchar" name="script_key" nullable="false" length="64"
+                comment="SHA-256 of the normalized URL or inline fingerprint"/>
+        <column xsi:type="varchar" name="type" nullable="false" length="16" default="external"
+                comment="external or inline"/>
+        <column xsi:type="varchar" name="label" nullable="false" length="512" comment="URL or inline preview"/>
+        <column xsi:type="text" name="url" nullable="true" comment="Last seen script URL (external)"/>
+        <column xsi:type="varchar" name="host" nullable="true" length="255" comment="Script host"/>
+        <column xsi:type="smallint" name="first_party" unsigned="true" nullable="false" default="0"
+                comment="Served from the store's own domain"/>
+        <column xsi:type="mediumtext" name="content" nullable="true" comment="Inline script source"/>
+        <column xsi:type="text" name="referenced_hosts" nullable="true"
+                comment="Hosts referenced inside an inline script"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="16" default="new"
+                comment="new, authorized or rejected"/>
+        <column xsi:type="text" name="justification" nullable="true" comment="Business justification"/>
+        <column xsi:type="varchar" name="authorized_by" nullable="true" length="255" comment="Authorized by"/>
+        <column xsi:type="datetime" name="authorized_at" nullable="true" comment="Authorized at"/>
+        <column xsi:type="smallint" name="allow_changes" unsigned="true" nullable="false" default="0"
+                comment="Expected to change (versionless third-party URL)"/>
+        <column xsi:type="varchar" name="baseline_hash" nullable="true" length="128"
+                comment="Approved SHA-384 (SRI format)"/>
+        <column xsi:type="varchar" name="current_hash" nullable="true" length="128"
+                comment="Last measured SHA-384 (SRI format)"/>
+        <column xsi:type="varchar" name="integrity_status" nullable="false" length="16" default="pending"
+                comment="pending, ok, changed or unreachable"/>
+        <column xsi:type="varchar" name="deploy_version" nullable="true" length="64"
+                comment="Static content version at the last check (first-party files)"/>
+        <column xsi:type="datetime" name="last_checked_at" nullable="true" comment="Last integrity check"/>
+        <column xsi:type="varchar" name="pages" nullable="true" length="255" comment="Pages the script was seen on"/>
+        <column xsi:type="int" name="seen_count" unsigned="true" nullable="false" default="0"
+                comment="Number of reports"/>
+        <column xsi:type="datetime" name="first_seen_at" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="First seen"/>
+        <column xsi:type="datetime" name="last_seen_at" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Last seen"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="script_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="MEETMAGE_PSG_SCRIPT_SCRIPT_KEY">
+            <column name="script_key"/>
+        </constraint>
+        <index referenceId="MEETMAGE_PSG_SCRIPT_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+    </table>
+
+    <!-- Maps the exact SHA-256 of an inline script, as sent by the browser, to its fingerprint entry,
+         so the browser only uploads the source of inline scripts the server has not seen yet. -->
+    <table name="meetmage_psg_inline_cache" resource="default" engine="innodb" comment="Inline script hash cache">
+        <column xsi:type="varchar" name="raw_hash" nullable="false" length="64" comment="SHA-256 of the raw source"/>
+        <column xsi:type="int" name="script_id" unsigned="true" nullable="false" comment="Script ID"/>
+        <column xsi:type="datetime" name="last_seen_at" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Last seen"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="raw_hash"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="MEETMAGE_PSG_INLINE_CACHE_SCRIPT_ID_MEETMAGE_PSG_SCRIPT_SCRIPT_ID"
+                    table="meetmage_psg_inline_cache" column="script_id"
+                    referenceTable="meetmage_psg_script" referenceColumn="script_id" onDelete="CASCADE"/>
+        <index referenceId="MEETMAGE_PSG_INLINE_CACHE_LAST_SEEN_AT" indexType="btree">
+            <column name="last_seen_at"/>
+        </index>
+    </table>
+
+    <!-- Activity log and alert queue for PCI DSS 4.0.1 requirement 11.6.1 -->
+    <table name="meetmage_psg_event" resource="default" engine="innodb" comment="Payment Script Guard activity">
+        <column xsi:type="int" name="event_id" unsigned="true" nullable="false" identity="true" comment="Event ID"/>
+        <column xsi:type="int" name="script_id" unsigned="true" nullable="true" comment="Script ID"/>
+        <column xsi:type="varchar" name="type" nullable="false" length="32" comment="Event type"/>
+        <column xsi:type="varchar" name="severity" nullable="false" length="16" default="info"
+                comment="info, warning or critical"/>
+        <column xsi:type="text" name="message" nullable="false" comment="Message"/>
+        <column xsi:type="datetime" name="created_at" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Created at"/>
+        <column xsi:type="datetime" name="notified_at" nullable="true" comment="Alert sent at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="event_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="MEETMAGE_PSG_EVENT_SCRIPT_ID_MEETMAGE_PSG_SCRIPT_SCRIPT_ID"
+                    table="meetmage_psg_event" column="script_id"
+                    referenceTable="meetmage_psg_script" referenceColumn="script_id" onDelete="SET NULL"/>
+        <index referenceId="MEETMAGE_PSG_EVENT_NOTIFIED_AT" indexType="btree">
+            <column name="notified_at"/>
+        </index>
+    </table>
+</schema>

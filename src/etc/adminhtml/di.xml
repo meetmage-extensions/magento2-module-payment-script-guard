@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Admin notice while scripts need review (system messages are configured for the admin area) -->
+    <virtualType name="MeetMagePsgReviewNotice"
+                 type="MeetMage\PaymentScriptGuard\Model\System\Message\ScriptsNeedReview"/>
+    <type name="Magento\Framework\Notification\MessageList">
+        <arguments>
+            <argument name="messages" xsi:type="array">
+                <item name="meetmage_psg_review" xsi:type="string">MeetMagePsgReviewNotice</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

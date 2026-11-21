@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="MeetMage_PaymentScriptGuard::guard" title="Payment Script Guard" translate="title"
+             module="MeetMage_PaymentScriptGuard" sortOrder="60" parent="Magento_Backend::system"
+             resource="MeetMage_PaymentScriptGuard::guard"/>
+        <add id="MeetMage_PaymentScriptGuard::inventory" title="Script Inventory" translate="title"
+             module="MeetMage_PaymentScriptGuard" sortOrder="10" parent="MeetMage_PaymentScriptGuard::guard"
+             action="meetmage_psg/script/index" resource="MeetMage_PaymentScriptGuard::inventory"/>
+        <add id="MeetMage_PaymentScriptGuard::activity" title="Activity Log" translate="title"
+             module="MeetMage_PaymentScriptGuard" sortOrder="20" parent="MeetMage_PaymentScriptGuard::guard"
+             action="meetmage_psg/event/index" resource="MeetMage_PaymentScriptGuard::activity"/>
+        <add id="MeetMage_PaymentScriptGuard::settings" title="Settings" translate="title"
+             module="MeetMage_PaymentScriptGuard" sortOrder="30" parent="MeetMage_PaymentScriptGuard::guard"
+             action="adminhtml/system_config/edit/section/meetmage_paymentscriptguard"
+             resource="MeetMage_PaymentScriptGuard::config"/>
+    </menu>
+</config>

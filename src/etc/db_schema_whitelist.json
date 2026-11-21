@@ -1,0 +1,68 @@
+{
+    "meetmage_psg_script": {
+        "column": {
+            "script_id": true,
+            "script_key": true,
+            "type": true,
+            "label": true,
+            "url": true,
+            "host": true,
+            "first_party": true,
+            "content": true,
+            "referenced_hosts": true,
+            "status": true,
+            "justification": true,
+            "authorized_by": true,
+            "authorized_at": true,
+            "allow_changes": true,
+            "baseline_hash": true,
+            "current_hash": true,
+            "integrity_status": true,
+            "deploy_version": true,
+            "last_checked_at": true,
+            "pages": true,
+            "seen_count": true,
+            "first_seen_at": true,
+            "last_seen_at": true
+        },
+        "index": {
+            "MEETMAGE_PSG_SCRIPT_STATUS": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "MEETMAGE_PSG_SCRIPT_SCRIPT_KEY": true
+        }
+    },
+    "meetmage_psg_inline_cache": {
+        "column": {
+            "raw_hash": true,
+            "script_id": true,
+            "last_seen_at": true
+        },
+        "index": {
+            "MEETMAGE_PSG_INLINE_CACHE_LAST_SEEN_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "FK_50447C66681D8294FC076280112CD3B4": true
+        }
+    },
+    "meetmage_psg_event": {
+        "column": {
+            "event_id": true,
+            "script_id": true,
+            "type": true,
+            "severity": true,
+            "message": true,
+            "created_at": true,
+            "notified_at": true
+        },
+        "index": {
+            "MEETMAGE_PSG_EVENT_NOTIFIED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "MEETMAGE_PSG_EVENT_SCRIPT_ID_MEETMAGE_PSG_SCRIPT_SCRIPT_ID": true
+        }
+    }
+}

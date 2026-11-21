@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <meetmage_paymentscriptguard>
+            <general>
+                <enabled>1</enabled>
+            </general>
+            <monitoring>
+                <pages>checkout_index_index
+multishipping_checkout_billing
+multishipping_checkout_overview</pages>
+                <sample_rate>100</sample_rate>
+                <auto_authorize_first_party>1</auto_authorize_first_party>
+                <first_party_hosts/>
+                <bulk_justification>Reviewed: required by the store theme or a checkout module.</bulk_justification>
+            </monitoring>
+            <integrity>
+                <enabled>1</enabled>
+            </integrity>
+            <headers>
+                <enabled>1</enabled>
+            </headers>
+            <alerts>
+                <enabled>1</enabled>
+                <recipients/>
+                <identity>general</identity>
+                <template>meetmage_paymentscriptguard_alerts_template</template>
+            </alerts>
+        </meetmage_paymentscriptguard>
+    </default>
+</config>

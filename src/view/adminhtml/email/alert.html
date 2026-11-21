@@ -1,0 +1,25 @@
+<!--@subject {{var subject_prefix}}Payment Script Guard: {{var count}} new alert(s) on your payment pages @-->
+<!--@vars {
+"var subject_prefix":"CRITICAL: when an alert is critical",
+"var count":"Number of alerts",
+"var events_html|raw":"Alert list",
+"var inventory_url":"Script inventory URL"
+} @-->
+<div style="font-family:Arial,Helvetica,sans-serif;color:#111827;max-width:760px">
+    <h1 style="font-size:20px;margin:0 0 12px">Payment Script Guard</h1>
+    <p style="margin:0 0 16px">
+        {{var count}} new alert(s) about the scripts or security headers of your payment pages.
+        Scripts on payment pages can read card details, so please review these now.
+    </p>
+    {{var events_html|raw}}
+    <p style="margin:20px 0">
+        <a href="{{var inventory_url}}"
+           style="background:#1d4ed8;color:#ffffff;padding:10px 16px;border-radius:6px;text-decoration:none">
+            Open the script inventory
+        </a>
+    </p>
+    <p style="font-size:12px;color:#6b7280">
+        Sent by the MeetMage Payment Script Guard extension (PCI DSS 4.0.1 requirements 6.4.3 and 11.6.1).
+        Change recipients under Stores &gt; Configuration &gt; MeetMage &gt; Payment Script Guard.
+    </p>
+</div>

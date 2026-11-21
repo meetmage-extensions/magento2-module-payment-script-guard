@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Admin grids -->
+    <virtualType name="MeetMagePsgScriptGrid"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">meetmage_psg_script</argument>
+            <argument name="resourceModel" xsi:type="string">MeetMagePsgScriptResource</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MeetMagePsgEventGrid"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">meetmage_psg_event</argument>
+            <argument name="resourceModel" xsi:type="string">MeetMagePsgEventResource</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MeetMagePsgScriptResource"
+                 type="MeetMage\PaymentScriptGuard\Model\ResourceModel\Script"/>
+    <virtualType name="MeetMagePsgEventResource"
+                 type="MeetMage\PaymentScriptGuard\Model\ResourceModel\Event"/>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="meetmage_psg_scripts_source" xsi:type="string">MeetMagePsgScriptGrid</item>
+                <item name="meetmage_psg_events_source" xsi:type="string">MeetMagePsgEventGrid</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- bin/magento meetmage:psg:check -->
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="meetmage_psg_check" xsi:type="object">MeetMagePsgCheckCommand</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="MeetMagePsgCheckCommand" type="MeetMage\PaymentScriptGuard\Console\Command\CheckCommand"/>
+
+    <!-- Short name for the payment page reporter view model (used in layout XML) -->
+    <virtualType name="MeetMagePsgReporter" type="MeetMage\PaymentScriptGuard\ViewModel\Reporter"/>
+    <virtualType name="MeetMagePsgReview" type="MeetMage\PaymentScriptGuard\ViewModel\Adminhtml\ScriptReview"/>
+</config>

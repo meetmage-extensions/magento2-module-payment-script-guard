@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <!-- Renders only on the payment pages set in the configuration (empty everywhere else),
+             so it works on any checkout: Luma, Hyvä Checkout or a one-step checkout module.
+             MeetMagePsgReporter = MeetMage\PaymentScriptGuard\ViewModel\Reporter (etc/di.xml). -->
+        <referenceContainer name="before.body.end">
+            <block name="meetmage.psg.reporter" template="MeetMage_PaymentScriptGuard::reporter.phtml"
+                   ifconfig="meetmage_paymentscriptguard/general/enabled">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">MeetMagePsgReporter</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

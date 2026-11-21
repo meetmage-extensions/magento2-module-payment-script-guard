@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <!-- MeetMagePsgReview = MeetMage\PaymentScriptGuard\ViewModel\Adminhtml\ScriptReview (etc/di.xml) -->
+        <referenceContainer name="content">
+            <block class="Magento\Backend\Block\Template" name="meetmage.psg.script.review"
+                   template="MeetMage_PaymentScriptGuard::script/review.phtml">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">MeetMagePsgReview</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>
