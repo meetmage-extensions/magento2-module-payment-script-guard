@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-22
+
 ### Added
 - Payment page script reporter (plain JavaScript, Luma, Hyvä and one-step checkouts): lists script files and
   inline scripts, also scripts injected later and removed right away; inline sources are uploaded only once.
@@ -20,3 +22,6 @@ All notable changes to this project are documented here. The format follows
 - Grouped email alerts, admin notice, activity log and CSV report for the PCI assessor.
 - Abuse limits on the public report endpoint (signed page token, size caps, daily limit on new entries) and
   SSRF protection for integrity downloads.
+
+[Unreleased]: https://github.com/meetmage-extensions/magento2-module-payment-script-guard/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/meetmage-extensions/magento2-module-payment-script-guard/releases/tag/v1.0.0

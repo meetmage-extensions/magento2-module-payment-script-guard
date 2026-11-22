@@ -7,7 +7,10 @@ Keep an inventory of every script on your Magento checkout, with a written justi
 (**requirement 11.6.1**). Catches injected card skimmers (Magecart). Works with Luma, Hyvä Checkout and
 one-step checkout modules.
 
-> **Status:** in development, not released yet. Tested on Magento Open Source 2.4.9 (Luma checkout).
+> Tested on Magento Open Source 2.4.9 with the Luma checkout. The reporter is plain JavaScript and is built to
+> work with Hyvä Checkout and one-step checkouts, which have not been tested yet: please
+> [open an issue](https://github.com/meetmage-extensions/magento2-module-payment-script-guard/issues) if something
+> doesn't work.
 
 [![CI](https://github.com/meetmage-extensions/magento2-module-payment-script-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/meetmage-extensions/magento2-module-payment-script-guard/actions/workflows/ci.yml)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
