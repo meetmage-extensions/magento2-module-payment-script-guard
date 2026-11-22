@@ -18,6 +18,36 @@ namespace MeetMage\PaymentScriptGuard\Model\Inventory;
 class InlineFingerprint
 {
     /**
+     * Prefix the reporter adds to code found in an HTML attribute: the attribute name, then a line break.
+     */
+    private const ATTRIBUTE_MARKER = '#^/\*@psg-attr ([A-Za-z0-9:@._-]{1,64})\*/\n#';
+
+    /**
+     * Name of the HTML attribute the code was found in, or null for an inline script.
+     *
+     * Script-free code paths (onclick="…", Alpine.js x-init="…", Knockout data-bind="…") run without a
+     * script tag, so the reporter sends risky attribute code tagged with the attribute name.
+     *
+     * @param string $source
+     * @return string|null
+     */
+    public function attributeName(string $source): ?string
+    {
+        return preg_match(self::ATTRIBUTE_MARKER, $source, $match) ? strtolower($match[1]) : null;
+    }
+
+    /**
+     * Source without the attribute marker.
+     *
+     * @param string $source
+     * @return string
+     */
+    public function withoutAttributeMarker(string $source): string
+    {
+        return (string) preg_replace(self::ATTRIBUTE_MARKER, '', $source, 1);
+    }
+
+    /**
      * Fingerprint of an inline script: SHA-256 of its normalized code plus referenced hosts.
      *
      * @param string $source

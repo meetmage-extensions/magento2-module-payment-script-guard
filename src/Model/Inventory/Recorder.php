@@ -211,7 +211,13 @@ class Recorder
      */
     private function recordInline(string $source, string $rawHash, string $page, string $now): ?int
     {
-        $key = hash('sha256', 'inline|' . $this->inlineFingerprint->fingerprint($source));
+        $attribute = $this->inlineFingerprint->attributeName($source);
+        if ($attribute !== null) {
+            $source = $this->inlineFingerprint->withoutAttributeMarker($source);
+            $key = hash('sha256', 'attribute|' . $attribute . '|' . $this->inlineFingerprint->fingerprint($source));
+        } else {
+            $key = hash('sha256', 'inline|' . $this->inlineFingerprint->fingerprint($source));
+        }
         $id = $this->scriptResource->getIdByKey($key);
         if ($id === null) {
             if ($this->isLimitReached()) {
@@ -221,8 +227,12 @@ class Recorder
             $hosts = $this->inlineFingerprint->hosts($source);
             $id = $this->insert([
                 'script_key' => $key,
-                'type' => Script::TYPE_INLINE,
-                'label' => mb_substr('Inline: ' . $preview, 0, 512),
+                'type' => $attribute !== null ? Script::TYPE_ATTRIBUTE : Script::TYPE_INLINE,
+                'label' => mb_substr(
+                    ($attribute !== null ? 'Attribute ' . $attribute . ': ' : 'Inline: ') . $preview,
+                    0,
+                    512
+                ),
                 'content' => $source,
                 'referenced_hosts' => $hosts ? implode("\n", $hosts) : null,
                 'status' => Script::STATUS_NEW,
@@ -238,7 +248,10 @@ class Recorder
                     Event::TYPE_NEW_SCRIPT,
                     Event::SEVERITY_WARNING,
                     sprintf(
-                        'New inline script on payment page %s%s: "%s". Review and authorize or reject it.',
+                        'New %s on payment page %s%s: "%s". Review and authorize or reject it.',
+                        $attribute !== null
+                            ? 'script code in an HTML attribute (' . $attribute . ')'
+                            : 'inline script',
                         $page,
                         $hosts ? ' (references ' . implode(', ', $hosts) . ')' : '',
                         $this->inlineFingerprint->preview($source, 120)

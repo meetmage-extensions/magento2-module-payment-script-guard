@@ -4,13 +4,13 @@
 
 Keep an inventory of every script on your Magento checkout, with a written justification for each one
 (**PCI DSS 4.0.1 requirement 6.4.3**), and get alerted when a script or the page's security headers change
-(**requirement 11.6.1**). Catches injected card skimmers (Magecart). Works with Luma, Hyvä Checkout and
-one-step checkout modules.
+(**requirement 11.6.1**). Catches injected card skimmers (Magecart). Works with Luma and Hyvä, and is built
+to work with Hyvä Checkout and one-step checkout modules.
 
-> Tested on Magento Open Source 2.4.9 with the Luma checkout. The reporter is plain JavaScript and is built to
-> work with Hyvä Checkout and one-step checkouts, which have not been tested yet: please
-> [open an issue](https://github.com/meetmage-extensions/magento2-module-payment-script-guard/issues) if something
-> doesn't work.
+> Tested on Magento Open Source 2.4.9 with the Luma checkout, and with Hyvä Theme 1.5 (Hyvä pages and the
+> free Luma checkout fallback). Hyvä Checkout (a commercial product) and one-step checkouts have not been tested
+> yet: please [open an issue](https://github.com/meetmage-extensions/magento2-module-payment-script-guard/issues)
+> if something doesn't work.
 
 [![CI](https://github.com/meetmage-extensions/magento2-module-payment-script-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/meetmage-extensions/magento2-module-payment-script-guard/actions/workflows/ci.yml)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
@@ -38,6 +38,11 @@ usual answer is a paid monthly monitoring service. This module does it inside Ma
   automatically, with an automatic justification, and still checked for changes.
 - Inline scripts are fingerprinted by their *code*: per-visitor data (cart, addresses, form keys) and Magento's
   random variable names don't create new entries, while any new domain referenced by the script always does.
+- **Script code in HTML attributes** runs without a script tag: event handlers (`onclick`, `<img onerror>`),
+  Alpine.js directives on Hyvä (`x-init`, `@click`, `:src`…) and Knockout bindings (`data-bind`) on Luma, and
+  `javascript:` links. The reporter checks these too, also when they are added or changed later, and adds any
+  that can send data or load code (network calls, `new Image`, `document.cookie`, `eval`, another domain…) to
+  the inventory. Harmless template expressions such as `x-show="open"` are skipped, so they don't flood it.
 - Inline sources are uploaded once; after that the browser only sends SHA-256 hashes.
 
 ### Change and tamper detection (11.6.1)
@@ -108,6 +113,9 @@ Magento cron must be running for integrity checks and email alerts.
 - The reporter is client-side: it sees what actually runs in shoppers' browsers, including scripts injected by
   compromised third parties. A skimmer that disables the reporter before it runs would not be reported, so the
   hourly server-side integrity check of your files is the second line of defence.
+- Attribute code is reported only when it matches known data-sending or code-loading patterns; heavily
+  obfuscated attribute code could slip through. On Hyvä, the CSP-compatible Alpine.js build (Hyvä's strict CSP
+  mode) stops attribute expressions from running arbitrary code at all, and is the stronger protection.
 - Headers added by your web server, load balancer or CDN are not visible to Magento; check those separately.
 - The public report endpoint accepts reports only with a token from a payment page rendered by your store,
   limits sizes, and stops accepting new entries after 2,000 in 24 hours. Script URLs reported by browsers are

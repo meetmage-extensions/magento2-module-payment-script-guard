@@ -12,6 +12,7 @@ class Script extends AbstractModel
 {
     public const TYPE_EXTERNAL = 'external';
     public const TYPE_INLINE = 'inline';
+    public const TYPE_ATTRIBUTE = 'attribute';
 
     public const STATUS_NEW = 'new';
     public const STATUS_AUTHORIZED = 'authorized';

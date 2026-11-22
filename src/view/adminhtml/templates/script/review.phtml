@@ -10,10 +10,15 @@ $script = $viewModel->getScript();
 if (!$script) {
     return;
 }
-$isInline = $script['type'] === 'inline';
+$isInline = $script['type'] !== 'external';
 $changed = $script['integrity_status'] === 'changed';
+$typeLabels = [
+    'external' => __('Script file'),
+    'inline' => __('Inline script'),
+    'attribute' => __('Code in an HTML attribute (event handler, Alpine.js or Knockout binding)'),
+];
 $rows = [
-    (string) __('Type') => $isInline ? __('Inline script') : __('Script file'),
+    (string) __('Type') => $typeLabels[$script['type']] ?? $script['type'],
     (string) __('Status') => $viewModel->statusLabel((string) $script['status']),
     (string) __('First-party') => $script['first_party'] ? __('Yes, served from your store') : __('No'),
     (string) __('Seen on') => $script['pages'],

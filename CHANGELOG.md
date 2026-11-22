@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- Script code in HTML attributes is now inventoried: event handlers (`onclick`, `onerror`…), Alpine.js
+  directives (Hyvä), Knockout bindings (Luma) and `javascript:` links, including attributes added or changed
+  after the page loaded. Only code that can send data or load code is reported, so normal template expressions
+  don't create entries. New script type "Attribute code" in the grid, review page and CSV report.
+
+### Changed
+- Tested with Hyvä Theme 1.5 (Hyvä pages and the Luma checkout fallback).
+
 ## [1.0.0] - 2026-11-22
 
 ### Added

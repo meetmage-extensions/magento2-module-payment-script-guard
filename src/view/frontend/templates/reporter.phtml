@@ -24,7 +24,18 @@ $script = <<<'JS'
         return;
     }
     var EXEC = /^(|text\/javascript|application\/javascript|module|text\/ecmascript|application\/ecmascript)$/i;
-    var seenSrc = {}, seenNodes = [], external = [], inline = {}, timer = null;
+    // Attributes whose value runs as code: event handlers, Alpine.js directives, Knockout bindings.
+    var CODE_ATTR = /^(on[a-z]+|x-[a-z][\w:.-]*|@[\w:.-]+|:[\w:.-]+|data-bind)$/i;
+    var URL_ATTR = /^(href|src|action|formaction|xlink:href)$/i;
+    // Attribute code is only reported when it can send data or load code: framework templates use many
+    // harmless expressions (x-show="open", @click="toggle()") that would otherwise flood the inventory.
+    var RISKY = new RegExp('\\b(fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource|Image|import|eval|'
+        + 'Function|setTimeout|setInterval|createElement|appendChild|insertAdjacentHTML|insertAdjacentElement|'
+        + 'write|writeln|atob|fromCharCode|postMessage)\\s*\\(|\\bwindow\\.open\\s*\\(|'
+        + '\\b(innerHTML|outerHTML|src|href|action|location)\\s*=(?!=)|\\blocation\\.(href|assign|replace)\\b|'
+        + '\\bdocument\\.cookie\\b|\\b(local|session)Storage\\b|\\[\\s*[\'"`][^\'"`]*[\'"`]\\s*\\+');
+    var HOST = /(?:https?:)?\/\/([a-z0-9][a-z0-9.-]*\.[a-z]{2,})/gi;
+    var seenSrc = {}, seenNodes = [], seenAttr = {}, attrCount = 0, external = [], inline = {}, timer = null;
     var stopAt = Date.now() + 600000;
     var pageUrl = location.protocol + '//' + location.host + location.pathname;
 
@@ -115,20 +126,70 @@ $script = <<<'JS'
         if (!text.trim()) {
             return;
         }
+        queue(text);
+    }
+    function queue(text) {
         sha256(text).then(function (hash) {
             inline[hash || ('raw:' + Math.random())] = text;
             schedule();
         });
     }
-    function scan(root) {
-        if (root.nodeName === 'SCRIPT') {
-            check(root);
+    function risky(code) {
+        if (RISKY.test(code)) {
+            return true;
+        }
+        var flat = code.replace(/\\u002f/gi, '/').replace(/\\u003a/gi, ':').replace(/\\\//g, '/'), m;
+        HOST.lastIndex = 0;
+        while ((m = HOST.exec(flat))) {
+            if (m[1].toLowerCase() !== location.hostname.toLowerCase()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    function checkAttr(name, value) {
+        var code = null;
+        if (CODE_ATTR.test(name)) {
+            code = value;
+        } else if (URL_ATTR.test(name) && /^\s*javascript:/i.test(value)) {
+            code = value.replace(/^\s*javascript:/i, '');
+        }
+        if (!code || !code.trim() || code.length > 8192 || attrCount >= 200 || !risky(code)) {
             return;
         }
+        var label = name.toLowerCase().replace(/[^a-z0-9:@._-]/g, '').slice(0, 64) || 'attribute';
+        var source = '/*@psg-attr ' + label + '*/\n' + code;
+        if (seenAttr[source]) {
+            return;
+        }
+        seenAttr[source] = 1;
+        attrCount++;
+        queue(source);
+    }
+    function checkAttrs(el) {
+        var attrs = el.attributes;
+        if (!attrs) {
+            return;
+        }
+        for (var i = 0; i < attrs.length; i++) {
+            checkAttr(attrs[i].name, attrs[i].value);
+        }
+    }
+    function scan(root) {
+        if (root.nodeType === 1) {
+            checkAttrs(root);
+            if (root.nodeName === 'SCRIPT') {
+                check(root);
+                return;
+            }
+        }
         if (root.getElementsByTagName) {
-            var list = root.getElementsByTagName('script');
-            for (var i = 0; i < list.length; i++) {
-                check(list[i]);
+            var all = root.getElementsByTagName('*');
+            for (var i = 0; i < all.length; i++) {
+                checkAttrs(all[i]);
+                if (all[i].nodeName === 'SCRIPT') {
+                    check(all[i]);
+                }
             }
         }
     }
@@ -143,12 +204,19 @@ $script = <<<'JS'
             // Use the added nodes from the records: a script that was added and removed again
             // in the meantime is no longer in the document, but it did run.
             for (var r = 0; r < records.length; r++) {
+                if (records[r].type === 'attributes') {
+                    var value = records[r].target.getAttribute(records[r].attributeName);
+                    if (value !== null) {
+                        checkAttr(records[r].attributeName, value);
+                    }
+                    continue;
+                }
                 for (var n = 0; n < records[r].addedNodes.length; n++) {
                     scan(records[r].addedNodes[n]);
                 }
             }
         });
-        observer.observe(document.documentElement, {childList: true, subtree: true});
+        observer.observe(document.documentElement, {childList: true, subtree: true, attributes: true});
     }
     window.addEventListener('load', function () {
         scan(document);

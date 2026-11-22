@@ -12,6 +12,12 @@ use MeetMage\PaymentScriptGuard\Model\Script;
  */
 class CsvReport
 {
+    private const TYPE_LABELS = [
+        Script::TYPE_EXTERNAL => 'File',
+        Script::TYPE_INLINE => 'Inline',
+        Script::TYPE_ATTRIBUTE => 'Attribute code',
+    ];
+
     private const COLUMNS = [
         'ID', 'Type', 'Script', 'Host', 'First-party', 'Status', 'Business justification', 'Authorized by',
         'Authorized at (UTC)', 'Hosts referenced (inline)', 'Pages', 'First seen (UTC)', 'Last seen (UTC)',
@@ -60,10 +66,10 @@ class CsvReport
             $this->line(self::COLUMNS),
         ];
         foreach ($rows as $row) {
-            $inline = $row['type'] === Script::TYPE_INLINE;
+            $inline = $row['type'] !== Script::TYPE_EXTERNAL;
             $lines[] = $this->line([
                 $row['script_id'],
-                $inline ? 'Inline' : 'File',
+                self::TYPE_LABELS[$row['type']] ?? $row['type'],
                 $inline ? $row['label'] : ($row['url'] ?: $row['label']),
                 $row['host'],
                 $row['first_party'] ? 'Yes' : 'No',
