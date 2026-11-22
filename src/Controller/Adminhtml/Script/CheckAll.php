@@ -39,7 +39,7 @@ class CheckAll extends Action implements HttpGetActionInterface
     public function execute(): Redirect
     {
         $stats = $this->checker->checkAll();
-        $message = __(
+        $message = (string) __(
             'Integrity check finished: %1 script file(s) checked, %2 changed, %3 could not be fetched.',
             $stats['checked'],
             $stats['changed'],

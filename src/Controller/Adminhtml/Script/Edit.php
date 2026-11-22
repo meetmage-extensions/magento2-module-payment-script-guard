@@ -52,7 +52,7 @@ class Edit extends Action implements HttpGetActionInterface
             $connection->select()->from($this->scriptResource->getMainTable(), 'script_id')->where('script_id = ?', $id)
         );
         if (!$exists) {
-            $this->messageManager->addErrorMessage(__('This script no longer exists.'));
+            $this->messageManager->addErrorMessage((string) __('This script no longer exists.'));
             return $this->resultRedirectFactory->create()->setPath('*/*/index');
         }
         /** @var \Magento\Backend\Model\View\Result\Page $page */

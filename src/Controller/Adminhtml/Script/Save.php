@@ -70,16 +70,16 @@ class Save extends Action implements HttpPostActionInterface
                     $adminName,
                     (bool) $this->getRequest()->getParam('allow_changes')
                 );
-                $this->messageManager->addSuccessMessage(__('The script is authorized.'));
+                $this->messageManager->addSuccessMessage((string) __('The script is authorized.'));
             } elseif ($decision === Script::STATUS_REJECTED) {
                 $this->review->reject($id, $justification, $adminName);
-                $this->messageManager->addSuccessMessage(__(
+                $this->messageManager->addSuccessMessage((string) __(
                     'The script is rejected. Remove it from the theme or module that adds it; you will be alerted '
                     . 'if it still runs on a payment page.'
                 ));
             } elseif ($decision === 'check') {
                 $status = $this->checker->checkOne($id);
-                $this->messageManager->addNoticeMessage(__('Integrity check finished: %1.', $status));
+                $this->messageManager->addNoticeMessage((string) __('Integrity check finished: %1.', $status));
             } else {
                 throw new LocalizedException(__('Choose what to do with the script.'));
             }

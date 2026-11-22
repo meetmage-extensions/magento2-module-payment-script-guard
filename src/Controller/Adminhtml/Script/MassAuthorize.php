@@ -84,7 +84,7 @@ class MassAuthorize extends Action implements HttpPostActionInterface
                 $this->review->authorize((int) $id, $this->config->getBulkJustification(), $adminName);
                 $count++;
             }
-            $this->messageManager->addSuccessMessage(__('%1 script(s) authorized.', $count));
+            $this->messageManager->addSuccessMessage((string) __('%1 script(s) authorized.', $count));
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
         }

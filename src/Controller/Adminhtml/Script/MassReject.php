@@ -75,7 +75,7 @@ class MassReject extends Action implements HttpPostActionInterface
                 $this->review->reject((int) $id, '', $adminName);
                 $count++;
             }
-            $this->messageManager->addSuccessMessage(__('%1 script(s) rejected.', $count));
+            $this->messageManager->addSuccessMessage((string) __('%1 script(s) rejected.', $count));
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
         }
