@@ -1,7 +1,7 @@
 {
     "name": "Payment Script Guard",
     "slug": "payment-script-guard",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "released": "2026-11-22",
     "packagist": "meetmage/module-payment-script-guard",
     "description": "Keep an inventory of every script on your Magento checkout with a justification for each (PCI DSS 4.0.1 requirement 6.4.3) and get alerted when a script or the page's security headers change (requirement 11.6.1). Catches injected card skimmers. Works with Luma, Hyvä and one-step checkouts.",
@@ -12,7 +12,7 @@
         {
             "icon": "search",
             "title": "Every checkout script, found automatically",
-            "text": "A tiny reporter on your payment pages lists every script file and inline script, including scripts injected after the page loads and removed straight away, the way card skimmers hide."
+            "text": "A tiny reporter on your payment pages lists every script file and inline script, including scripts injected after the page loads and removed straight away, the way card skimmers hide. Risky code in HTML attributes (onerror, Alpine.js on Hyvä, Knockout on Luma) is caught too."
         },
         {
             "icon": "check",

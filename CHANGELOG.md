@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-22
+
 ### Added
 - Script code in HTML attributes is now inventoried: event handlers (`onclick`, `onerror`…), Alpine.js
   directives (Hyvä), Knockout bindings (Luma) and `javascript:` links, including attributes added or changed
@@ -32,5 +34,6 @@ All notable changes to this project are documented here. The format follows
 - Abuse limits on the public report endpoint (signed page token, size caps, daily limit on new entries) and
   SSRF protection for integrity downloads.
 
-[Unreleased]: https://github.com/meetmage-extensions/magento2-module-payment-script-guard/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/meetmage-extensions/magento2-module-payment-script-guard/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/meetmage-extensions/magento2-module-payment-script-guard/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/meetmage-extensions/magento2-module-payment-script-guard/releases/tag/v1.0.0
