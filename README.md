@@ -1,5 +1,7 @@
 # Payment Script Guard for Magento 2
 
+![Payment Script Guard for Magento 2](docs/images/hero.webp)
+
 Keep an inventory of every script on your Magento checkout, with a written justification for each one
 (**PCI DSS 4.0.1 requirement 6.4.3**), and get alerted when a script or the page's security headers change
 (**requirement 11.6.1**). Catches injected card skimmers (Magecart). Works with Luma, Hyvä Checkout and

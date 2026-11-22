@@ -67,7 +67,28 @@
         "hyva"
     ],
     "testedOn": "2.4.9",
-    "images": [],
+    "images": [
+        {
+            "src": "docs/images/hero.webp",
+            "alt": "Payment Script Guard for Magento 2: every checkout script inventoried and approved for PCI DSS 4.0.1"
+        },
+        {
+            "src": "docs/images/script-inventory.webp",
+            "alt": "Script inventory: approve or reject each checkout script with a written justification"
+        },
+        {
+            "src": "docs/images/skimmer-caught.webp",
+            "alt": "A card skimmer injected into the checkout is caught and an alert is raised"
+        },
+        {
+            "src": "docs/images/tamper-detection.webp",
+            "alt": "Hourly SHA-384 check spots a script file that changed without a deployment"
+        },
+        {
+            "src": "docs/images/pci-report.webp",
+            "alt": "One-click CSV report of every script, justification and hash for your PCI assessor"
+        }
+    ],
     "documentation": "https://github.com/meetmage-extensions/magento2-module-payment-script-guard#readme",
     "status": "in-development"
 }
